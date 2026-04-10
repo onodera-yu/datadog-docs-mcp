@@ -20,7 +20,10 @@ mcp = FastMCP(
     instructions=(
         "Datadog documentation server. Use list_documents to browse the index, "
         "read_document to fetch a specific page, and search_documents to find "
-        "documents by keyword."
+        "documents by keyword. "
+        "IMPORTANT: All documentation is in English. Always use English keywords "
+        "when calling search_documents or list_documents, even if the user's "
+        "question is in another language."
     ),
 )
 
@@ -197,7 +200,7 @@ async def search_documents(query: str, limit: int = 20) -> str:
     must match.
 
     Args:
-        query: Search query (case-insensitive). Multiple words are scored individually.
+        query: Search query in English (case-insensitive). Multiple words are scored individually.
         limit: Maximum number of results to return (default 20).
 
     Returns:
