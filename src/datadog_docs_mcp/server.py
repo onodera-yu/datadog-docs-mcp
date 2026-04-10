@@ -1,10 +1,15 @@
 """MCP server for Datadog LLM documentation."""
 
 import re
+import ssl
 from dataclasses import dataclass
 
 import httpx
+import truststore
 from mcp.server.fastmcp import FastMCP
+
+# Use the OS certificate store (supports corporate proxy CAs on Windows)
+_ssl_ctx = truststore.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
 
 LLMS_TXT_URL = "https://docs.datadoghq.com/llms.txt"
 BASE_URL = "https://docs.datadoghq.com"
@@ -46,7 +51,7 @@ class IndexCache:
         return self._entries
 
     async def _load(self) -> None:
-        async with httpx.AsyncClient(timeout=30) as client:
+        async with httpx.AsyncClient(timeout=30, verify=_ssl_ctx) as client:
             resp = await client.get(LLMS_TXT_URL)
             resp.raise_for_status()
             self._raw = resp.text
@@ -138,7 +143,7 @@ async def read_document(url: str, max_chars: int = 50000) -> str:
     if not url.startswith("http"):
         url = f"{BASE_URL}/{url.lstrip('/')}"
 
-    async with httpx.AsyncClient(timeout=30, follow_redirects=True) as client:
+    async with httpx.AsyncClient(timeout=30, follow_redirects=True, verify=_ssl_ctx) as client:
         resp = await client.get(url)
         resp.raise_for_status()
         content = resp.text
@@ -170,7 +175,7 @@ async def read_document_chunk(
     if not url.startswith("http"):
         url = f"{BASE_URL}/{url.lstrip('/')}"
 
-    async with httpx.AsyncClient(timeout=30, follow_redirects=True) as client:
+    async with httpx.AsyncClient(timeout=30, follow_redirects=True, verify=_ssl_ctx) as client:
         resp = await client.get(url)
         resp.raise_for_status()
         content = resp.text
