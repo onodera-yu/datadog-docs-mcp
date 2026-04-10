@@ -11,7 +11,7 @@ Datadog の公式 LLM ドキュメント（[llms.txt](https://docs.datadoghq.com
 | `list_documents` | ドキュメント一覧の取得（セクション絞り込み・ページネーション対応） |
 | `read_document` | 指定 URL のドキュメントを Markdown で取得 |
 | `read_document_chunk` | 大きなドキュメントのチャンク読み込み |
-| `search_documents` | キーワードでドキュメント検索（AND 検索） |
+| `search_documents` | キーワードでドキュメント検索（スコアリング方式） |
 | `get_index_sections` | セクション一覧と件数を表示 |
 | `refresh_index` | キャッシュしたインデックスを強制リフレッシュ |
 
@@ -31,6 +31,27 @@ Datadog の公式 LLM ドキュメント（[llms.txt](https://docs.datadoghq.com
     }
   }
 }
+```
+
+### Windows の場合
+
+`uvx` が見つからない場合はフルパスを指定するか、`cmd` 経由で実行してください。
+
+```json
+{
+  "mcpServers": {
+    "datadog-docs": {
+      "command": "cmd",
+      "args": ["/c", "uvx", "--from", "git+https://github.com/onodera-yu/datadog-docs-mcp", "datadog-docs-mcp"]
+    }
+  }
+}
+```
+
+Windows への uv のインストール（PowerShell）:
+
+```powershell
+irm https://astral.sh/uv/install.ps1 | iex
 ```
 
 ### その他の MCP 対応クライアント
