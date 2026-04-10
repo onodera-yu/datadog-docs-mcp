@@ -187,30 +187,51 @@ async def read_document_chunk(
 async def search_documents(query: str, limit: int = 20) -> str:
     """Search Datadog documentation index by keyword.
 
-    Searches document titles and section names for matching entries.
+    Searches document titles and section names. Results are ranked by the
+    number of matching keywords (best matches first). At least one keyword
+    must match.
 
     Args:
-        query: Search query (case-insensitive). Multiple words are AND-matched.
+        query: Search query (case-insensitive). Multiple words are scored individually.
         limit: Maximum number of results to return (default 20).
 
     Returns:
-        A formatted list of matching documents.
+        A formatted list of matching documents, ranked by relevance.
     """
     entries = await _cache.get_entries()
     keywords = query.lower().split()
 
-    results = []
-    for e in entries:
-        text = f"{e.title} {e.section}".lower()
-        if all(kw in text for kw in keywords):
-            results.append(e)
+    # Words too common in this context to be useful on their own
+    stop_words = {"datadog", "the", "a", "an", "and", "or", "for", "to", "in", "of", "with"}
 
-    if not results:
+    scored: list[tuple[float, DocEntry]] = []
+    for e in entries:
+        title_lower = e.title.lower()
+        section_lower = e.section.lower()
+        text = f"{title_lower} {section_lower}"
+
+        score = 0.0
+        for kw in keywords:
+            if kw in stop_words:
+                if kw in text:
+                    score += 0.1  # minor boost
+                continue
+            if kw in title_lower:
+                score += 2.0  # title match weighted higher
+            elif kw in section_lower:
+                score += 1.0
+
+        if score > 0:
+            scored.append((score, e))
+
+    if not scored:
         return f"No documents found matching '{query}'."
 
-    results = results[:limit]
-    lines = [f"Found {len(results)} result(s) for '{query}':\n"]
-    for e in results:
+    scored.sort(key=lambda x: x[0], reverse=True)
+    results = scored[:limit]
+
+    lines = [f"Found {len(scored)} result(s) for '{query}' (showing top {len(results)}):\n"]
+    for score, e in results:
         lines.append(f"- [{e.title}]({e.url})")
         if e.section:
             lines.append(f"  Section: {e.section}")
