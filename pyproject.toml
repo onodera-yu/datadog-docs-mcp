@@ -1,0 +1,16 @@
+[project]
+name = "datadog-docs-mcp"
+version = "0.1.0"
+description = "MCP server for Datadog LLM documentation"
+requires-python = ">=3.13"
+dependencies = [
+    "mcp[cli]>=1.0.0",
+    "httpx>=0.27.0",
+]
+
+[project.scripts]
+datadog-docs-mcp = "datadog_docs_mcp.server:mcp.run"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
