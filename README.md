@@ -21,24 +21,6 @@ Datadog の公式 LLM ドキュメント（[llms.txt](https://docs.datadoghq.com
 
 - [uv](https://docs.astral.sh/uv/getting-started/installation/) がインストールされていること
 
-### Claude Code
-
-`~/.claude/settings.json`:
-
-```json
-{
-  "mcpServers": {
-    "datadog-docs": {
-      "command": "uvx",
-      "args": ["--from", "git+https://github.com/onodera-yu/datadog-docs-mcp", "datadog-docs-mcp"]
-    }
-  }
-}
-```
-
-### LM Studio
-
-設定画面の MCP サーバー設定に以下を追加:
 
 ```json
 {
